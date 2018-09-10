@@ -101,6 +101,7 @@
           <instructions>
             <Bundle-Vendor>Lijun Liao (xipki.org)</Bundle-Vendor>
             <Bundle-Build-Id>${buildNumber}</Bundle-Build-Id>
+            <Bundle-Description>${project.name}</Bundle-Description>
             <Bundle-Build-Timestamp>${timestamp}</Bundle-Build-Timestamp>
           </instructions>
         </configuration>
