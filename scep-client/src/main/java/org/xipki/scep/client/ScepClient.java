@@ -25,6 +25,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSocketFactory;
+
 import org.xipki.scep.client.exception.ScepClientException;
 import org.xipki.scep.util.ScepUtil;
 
@@ -35,9 +39,21 @@ import org.xipki.scep.util.ScepUtil;
 
 public class ScepClient extends Client {
 
+  private SSLSocketFactory sslSocketFactory;
+
+  private HostnameVerifier hostnameVerifier;
+
   public ScepClient(CaIdentifier caId, CaCertValidator caCertValidator)
       throws MalformedURLException {
     super(caId, caCertValidator);
+  }
+
+  public ScepClient(CaIdentifier caId, CaCertValidator caCertValidator,
+      SSLSocketFactory sslSocketFactory, HostnameVerifier hostnameVerifier)
+      throws MalformedURLException {
+    super(caId, caCertValidator);
+    this.sslSocketFactory = sslSocketFactory;
+    this.hostnameVerifier = hostnameVerifier;
   }
 
   @Override
@@ -45,6 +61,15 @@ public class ScepClient extends Client {
     ScepUtil.requireNonNull("url", url);
     try {
       HttpURLConnection httpConn = openHttpConn(new URL(url));
+      if (httpConn instanceof HttpsURLConnection) {
+        if (sslSocketFactory != null) {
+          ((HttpsURLConnection) httpConn).setSSLSocketFactory(sslSocketFactory);
+        }
+        if (hostnameVerifier != null) {
+          ((HttpsURLConnection) httpConn).setHostnameVerifier(hostnameVerifier);
+        }
+      }
+
       httpConn.setRequestMethod("GET");
       return parseResponse(httpConn);
     } catch (IOException ex) {
